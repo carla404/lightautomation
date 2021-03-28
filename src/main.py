@@ -1,6 +1,4 @@
-from pytradfri import Gateway
-from pytradfri.api.libcoap_api import APIFactory
-from pytradfri.error import PytradfriError
+import tradfriObjects
 
 import uuid
 import argparse
@@ -24,9 +22,10 @@ def getConfig():
         CONFIG_FILE = args.config_file
 
     try:
-        fd = open(os.path.join(os.path.dirname(__file__), CONFIG_FILE))
+        fd = open(CONFIG_FILE)
     except IOError as e:
         print("I/O error({}): {}".format(e.errno, e.strerror))
+        exit()
 
     js = json.load(fd)
 
@@ -35,39 +34,24 @@ def getConfig():
 def main():
     conf = getConfig()
 
-    try:
-        identity = conf["identity"]
-        api_factory = APIFactory(host=conf["ip"], psk_id=identity, psk=conf["key"])
-    except KeyError:
-        identity = uuid.uuid4().hex
-        api_factory = APIFactory(host=conf["ip"], psk_id=identity)
-
-        try:
-            psk = api_factory.generate_psk(conf["key"])
-            print("Generated PSK: ", psk)
-
-            conf["identity"] = identity
-            conf["key"] = psk
-
-        except AttributeError:
-            raise PytradfriError(
-                "Please provide the 'Security Code' on the "
-                "back of your Tradfri gateway using the "
-                "-K flag."
-            )
+    gw = tradfriObjects.gw(conf["ip"],conf["key"])
 
 
-    api = api_factory.request
 
-    gateway = Gateway()
 
-    devices_command = gateway.get_devices()
-    devices_commands = api(devices_command)
-    devices = api(devices_commands)
 
-    for device in devices:
-        print(device)
-    print("done...")
+
+
+    gw.turnLightsOff()
+    time.sleep(1)
+
+    gw.turnLightsOn(80)
+    time.sleep(1)
+
+    gw.turnLightsOff()
+    time.sleep(1)
+
+
 
 
 
