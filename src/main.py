@@ -1,9 +1,12 @@
 import tradfriObjects
+import phone
 
 import uuid
 import argparse
 import json
 import os
+import sys
+import time
 
 def getConfig():
     CONFIG_FILE = "config.json"
@@ -35,6 +38,10 @@ def main():
     conf = getConfig()
 
     gw = tradfriObjects.gw(conf["ip"],conf["key"])
+    phones = []
+    for name in conf["phones"]:
+        print(conf["phones"][name]["BT"])
+        phones.append(phone.Phone(name,bluetooth_address=conf["phones"][name]["BT"]))
 
 
 
