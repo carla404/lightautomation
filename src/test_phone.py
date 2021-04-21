@@ -1,7 +1,7 @@
 import unittest
 import time
 from unittest import mock
-from phone import Phone, bluetooth
+from phone import Phone, bluetooth, State
 
 
 
@@ -40,22 +40,21 @@ class test_phone(unittest.TestCase):
         self.assertFalse(self.sut.__isHome__())
         bluetooth.find_service.assert_called_with(address=self.bluetooth_address)
 
-    def cameHome(self):
+    def stateChanged(self):
         print("Came home!")
-        self.home = True
-
-    def leftHome(self):
-        print("Left home!")
-        self.home = False
+        if self.sut.state == State.HOME:
+            self.home = True
+        else:
+            self.home = False
 
     #@patch('time.sleep', return_value=None)
     def test_phoneComesHome(self):
+        self.home = False
 
         bluetooth.find_service = mock.MagicMock(return_value=[])
         time.sleep = mock.Mock(return_value=None)
 
-        self.sut.addCallbackCameHome(self.cameHome)
-        self.sut.addCallbackLeftHome(self.leftHome())
+        self.sut.addCBStateChanged(self.stateChanged)
 
         self.sut.startTracing()
         while time.sleep.call_count < 5:

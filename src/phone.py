@@ -21,16 +21,12 @@ class Phone(object):
         self.state = State.AWAY
 
 
-    def addCallbackLeftHome(self, function):
-        self.cbLeftHome = function
-    def addCallbackCameHome(self, function):
-        self.cbCameHome = function
+    def addCBStateChanged(self, function):
+        self.cbStateChanged = function
 
     def startTracing(self):
-        if self.cbLeftHome == None:
-            Exception("Left home callback not given")
-        if self.cbCameHome == None:
-            Exception("Came home callback not given")
+        if self.cbStateChanged == None:
+            Exception("No callback given")
         print("Trace")
         self.tracerThread = threading.Thread(target=self.doStartTracing)
         self.tracerThread.start()
@@ -47,9 +43,9 @@ class Phone(object):
         if self.state != state:
             self.state = state
             if state == State.HOME:
-                self.cbCameHome()
+                self.cbStateChanged()
                 return
-            self.cbLeftHome()
+            self.cbStateChanged()
 
     def doStartTracing(self):
         print("StartDoTracing")
